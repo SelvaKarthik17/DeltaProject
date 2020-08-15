@@ -149,7 +149,7 @@
     				ob_clean();
     				flush();
     				readfile($downfile);
-    				//unlink($downfile);
+    				unlink($downfile);
     				exit;
 				}
 		
