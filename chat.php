@@ -93,8 +93,7 @@
 		     	//unset($_SESSION['chatfriend']);
 		     	//unset($fid);
 		     	//$_SESSION['chatfriend'] = "";
-		     	//$tempp = $_SESSION['chatfriend'];
-		     	//echo "<script type=\"text/javascript\">alert(\"$tempp\")</script>";
+
 		     	header('location:friends.php');
 
 		     }
