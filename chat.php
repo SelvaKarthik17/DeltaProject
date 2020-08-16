@@ -2,7 +2,6 @@
 <?php
 	require 'dbconfig/config.php';
 	session_start();
-	//header("refresh: 1"); 
 
 	$username = $_SESSION['username'];
 	$fid = $_SESSION['chatfriend'];
