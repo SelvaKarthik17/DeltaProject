@@ -123,7 +123,7 @@
 			}
 					
 						if(isset($_POST["$i"]))
-			{    echo '<script type="text/javascript">alert("rundd")</script>';
+			{   // echo '<script type="text/javascript">alert("rundd")</script>';
 				
 
 				$mm = file_get_contents("$add[$i]");
