@@ -14,6 +14,11 @@
 <body>
 	<div>
 
+		<form action = "receivedfiles.php" method = "POST" >
+			<a href ="homepage.php"><input type="button" name="returnhome" id="home" value="Return to homepage"/></a>
+			<br>
+		</form>	
+
 		<?php
 
 				function my_encrypt($data, $key) {
@@ -48,7 +53,7 @@
 
 			while ($row = mysqli_fetch_assoc($query_run)) 
 			{				 
-				echo '<script type="text/javascript">alert("run")</script>';
+				//echo '<script type="text/javascript">alert("run")</script>';
 			//echo '<script type="text/javascript">alert("run")</script>';
 
 			//$addr = $row["filedest"] ;
@@ -74,7 +79,7 @@
 				echo "<figure>
 				<img src=$addr width = 100px height= 100px>
 			 	<figcaption>$name</figcaption>
-			    <form action = \"homepage.php\" method = \"POST\" enctype=\"multipart/form-data\">
+			    <form action = \"receivedfiles.php\" method = \"POST\" enctype=\"multipart/form-data\">
 				<button type =\"submit\" name=\"$i\">DOWNLOAD</button>
 				</form>
 				</figure>";
@@ -88,7 +93,7 @@
 			 echo "<figure>
 			 	<img src = 'pdflogo.png' width = 100px height= 100px> 
 			 	<figcaption>$name</figcaption>
-			  <form action = \"homepage.php\" method = \"POST\" enctype=\"multipart/form-data\">
+			  <form action = \"receivedfiles.php\" method = \"POST\" enctype=\"multipart/form-data\">
 				<button type =\"submit\" name=\"$i\">DOWNLOAD</button>
 				</form>
 				</figure> ";
@@ -99,7 +104,7 @@
 			 echo "<figure>
 				  <img src = 'doclogo.jpg' width = 100px height= 100px>
 				  <figcaption>$name </figcaption>
-			 	  <form action = \"homepage.php\" method = \"POST\" enctype=\"multipart/form-data\">
+			 	  <form action = \"receivedfiles.php\" method = \"POST\" enctype=\"multipart/form-data\">
 				 	<button type =\"submit\" name=\"$i\">DOWNLOAD</button>
 				  </form>
 				 </figure> ";
@@ -110,7 +115,7 @@
 				echo "<figure>
 				<img src = 'filelogo.png' width = 100px height= 100px>
 				<figcaption>$name </figcaption>
-			 	<form action = \"homepage.php\" method = \"POST\" enctype=\"multipart/form-data\">
+			 	<form action = \"receivedfiles.php\" method = \"POST\" enctype=\"multipart/form-data\">
 					<button type =\"submit\" name=\"$i\">DOWNLOAD</button>
 
 				</figure> ";			
@@ -137,8 +142,8 @@
 // Force the download
 				if (file_exists($downfile)) {
     				header('Content-Description: File Transfer');
-   			     	//header('Content-Type: application/octet-stream');
-   			     	header('Content-Type: image/jpeg');
+   			     	header('Content-Type: application/octet-stream');
+   			     	//header('Content-Type: image/jpeg');
  			    	header('Content-Disposition: attachment; filename='.basename($downfile));
  			    	//header("Content-Disposition: attachment; filename=$downfile");
     				header('Content-Transfer-Encoding: binary');
@@ -149,7 +154,7 @@
     				ob_clean();
     				flush();
     				readfile($downfile);
-    				unlink($downfile);
+    				//unlink($downfile);
     				exit;
 				}
 		
