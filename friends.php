@@ -87,17 +87,20 @@
 
 			$query = "SELECT * from friends WHERE (user1='$username'OR user2='$username' )";
 			$qr = mysqli_query($con,$query);
+			$friend[0] = "";
+			$k = 0;
 
 			while ($row = $qr->fetch_assoc())
 					 {		//echo "<script type=\"text/javascript\">alert(\"running\")</script>";
 
+
 					      if($username == $row["user1"]){
 
-					      	$friend = $row["user2"];
+					      	$friend[$k] = $row["user2"];
 					      	$rs = $row["rstatus"];// relationship status
 
 					      		if($rs == 1){
-					      				echo "<a>$friend</a><br>
+					      				echo "<a>$friend[$k]</a><br>
 					      				      <a>Friend request sent</a> ";
 					      		} 
 					      	/*	else if ($rs == 0){
@@ -106,9 +109,17 @@
 					      		}*/
 					      		else if($rs == 2){
 					      			//echo "<a href=\"chat.php?f=$friend\">$friend</a><br>";
-					      			echo "<a href=\"chat.php\">$friend</a><br>";
-					      			$_SESSION['chatfriend'] = $friend;
-					      			unset($friend);
+					      			//echo "<a href=\"chat.php\">$friend[$k]</a><br>";
+
+					      		    echo "<a>$friend[$k]</a><br>
+					      				<form method=\"post\" action=\"\">     									
+        									<input type=\"hidden\" name=\"frd\" value=\"$friend[$k]\"/>
+        									<input type=\"submit\" name=\"chat\" value=\"chat\"/>
+      								    </form>";				      		
+
+
+					      			//$_SESSION['chatfriend'] = $friend[$k];
+					      			//unset($friend);
 					      		}
 
 
@@ -117,15 +128,15 @@
 
 					      else if($username == $row["user2"]){
 
-					      	$friend = $row["user1"];
+					      	$friend[$k] = $row["user1"];
 					      	$rs = $row["rstatus"];
 
 					      	if($rs == 1){
-					      		echo "<a>$friend</a><br>
+					      		echo "<a>$friend[$k]</a><br>
 					      				<form method=\"post\" action=\"\">
         									<input type=\"submit\" name=\"accept\" value=\"Accept\"/>
         									<input type=\"submit\" name=\"discard\" value=\"Discard\"/>
-        									<input type=\"hidden\" name=\"frnd\" value=\"$friend\"/>
+        									<input type=\"hidden\" name=\"frnd\" value=\"$friend[$k]\"/>
       								    </form>";				      		
 
 					      	}
@@ -135,16 +146,23 @@
 					      				      <a>Not friends</a> ";
 					      		}*/
 					      	else if($rs == 2){
-					      			echo "<a href=\"chat.php\">$friend</a><br>";
-					      			$_SESSION['chatfriend'] = $friend;
-					      			unset($friend);
+					      			//echo "<a href=\"chat.php\">$friend[$k]</a><br>";
+
+					      		    echo "<a>$friend[$k]</a><br>
+					      				<form method=\"post\" action=\"\">     									
+        									<input type=\"hidden\" name=\"frd\" value=\"$friend[$k]\"/>
+        									<input type=\"submit\" name=\"chat\" value=\"chat\"/>
+      								    </form>";				      		
+
+					      			//$_SESSION['chatfriend'] = $friend[$k];
+					      			//unset($friend);
 					      		}
 
 
 
 					      }
    				 		
-
+					      $k = $k + 1;
 				     }
 
 
@@ -164,6 +182,13 @@
 				     		$friend = $_POST['frnd'];
 				     		$query = "UPDATE friends SET rstatus = '0' WHERE (user1 = '$friend' AND user2 = '$username')";
 				     		$qr = mysqli_query($con,$query);
+				     }
+
+
+				     if(isset($_POST['chat']))
+				     {
+				     	$_SESSION['chatfriend'] = $_POST['frd'];
+				     	header('location:chat.php');
 				     }
 
 
