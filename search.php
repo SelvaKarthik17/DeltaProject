@@ -20,11 +20,10 @@
         <h2>PROJECT-X</h2>
           <h3 id="uname">hello <?php echo $_SESSION['username'] ?></h3>
         <ul>
-            <li><a href="homepage.php"><i class="fas fa-home"></i>Home</a></li>
-            <li><a href="friends.php"><i class="fas fa-user"></i>Friends & Chat</a></li>
-            <li><a href="receivedfiles.php"><i class="fas fa-address-card"></i>Files Received</a></li>
- 
-            <li><a href="logout.php"><i class="fas fa-map-pin"></i>Logout</a></li>
+            <li><a href="homepage.php">Home</a></li>
+            <li><a href="friends.php">Friends & Chat</a></li>
+            <li><a href="receivedfiles.php">Files Received</a></li>
+            <li><a href="logout.php">Logout</a></li>
         </ul> 
 
        </div>
