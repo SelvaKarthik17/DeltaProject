@@ -3,6 +3,12 @@
 	require 'dbconfig/config.php';
 	session_start();
 
+	if(!isset($_SESSION['username']))
+		{	
+			header('location:login.php');
+		}
+	//header("refresh: 1"); 
+
 	$username = $_SESSION['username'];
 	$fid = $_SESSION['chatfriend'];
 
@@ -13,23 +19,38 @@
 <head>
 	<title>Chat</title>
 	<meta charset="UTF-8">
+    <link rel="stylesheet" href="mainstyles.css">
 
 </head>
 
 <body>
-	<div>
+    
+	<div class="wrapper">
+        
+        
+         <div class="sidebar">
+        <h2>PROJECT-X</h2>
+          <h3 id="uname">hello <?php echo $_SESSION['username'] ?></h3>
+        <ul>
+            <li><a href="homepage.php"><i class="fas fa-home"></i>Home</a></li>
+            <li><a href="friends.php"><i class="fas fa-user"></i>Friends & Chat</a></li>
+            <li><a href="receivedfiles.php"><i class="fas fa-address-card"></i>Files Received</a></li>
+ 
+            <li><a href="logout.php"><i class="fas fa-map-pin"></i>Logout</a></li>
+        </ul> 
 
+       </div>
+        
+        <div class="main_content">
 
 			<form action = "chat.php" method = "POST" enctype="multipart/form-data">
-				<label><b>Search:</b></label><br>
 				<input name="msg" type="text" class="inputvalues" placeholder="type message to send" required />
 				
-				<input type="submit" name="sendmsg" id="submit_btn" value="Send" />
+				<input type="submit" name="sendmsg" id="submit_btn" value="Send message" />
 			<br>
+                <br>
 			</form>
-			<form action = "chat.php" method = "POST" enctype="multipart/form-data">
-				<input type="submit" name="returnfrnds" id="home" value="Return to friends list" />
-			</form>	
+
 			<div class="display">
 			</div>
 
@@ -41,7 +62,7 @@
            <script type="text/javascript">
 
 
-           	setInterval(updater,1000);
+           	setInterval(updater,250);
            	function updater()
 
            	{	//alert('rinn');
@@ -51,8 +72,6 @@
            				document.getElementsByClassName('display')[0].innerHTML = data;
 
            			}
-
-
 
 
 
@@ -73,16 +92,22 @@
 
 			//$fid = $_GET['f'];
 			$fid = $_SESSION['chatfriend'];
-			echo"<a>hello</a> ";
+
 			//echo "<script type=\"text/javascript\">alert(\"$fid\")</script>";
-			echo "<a>$fid</a>";
 
 			if(isset($_POST['sendmsg'])){
 
 			$send = $_POST['msg'];
 
-			$stmt = "INSERT into chat(sender,receiver,message) values('$username','$fid','$send') ";
-			$query_run = mysqli_query($con,$stmt);
+			$query = "INSERT into chat(sender,receiver,message) values(?,?,?)";
+
+            $stmt = mysqli_prepare($con,$query);
+            mysqli_stmt_bind_param($stmt,'sss',$username,$fid,$send);
+            mysqli_stmt_execute($stmt);
+            $query_run = mysqli_stmt_get_result($stmt);
+
+
+			//$query_run = mysqli_query($con,$stmt);
 
 
 		     }
@@ -93,7 +118,8 @@
 		     	//unset($_SESSION['chatfriend']);
 		     	//unset($fid);
 		     	//$_SESSION['chatfriend'] = "";
-
+		     	//$tempp = $_SESSION['chatfriend'];
+		     	//echo "<script type=\"text/javascript\">alert(\"$tempp\")</script>";
 		     	header('location:friends.php');
 
 		     }
@@ -104,6 +130,7 @@
 		?>
 
 
+        </div>
 	</div>	
 
 </body>

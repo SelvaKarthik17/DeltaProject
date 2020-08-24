@@ -9,36 +9,38 @@
 <head>
 	<title>HomePage</title>
 	<meta charset="UTF-8">
+    <link rel="stylesheet" href="mainstyles.css">
 
 </head>
 
 <body>
-	<div>
+    
+	<div class="wrapper">
+      <div class="sidebar">
+        <h2>PROJECT-X</h2>
+          <h3 id="uname">hello <?php echo $_SESSION['username'] ?></h3>
+        <ul>
+            <li><a href="homepage.php"><i class="fas fa-home"></i>Home</a></li>
+            <li><a href="friends.php"><i class="fas fa-user"></i>Friends & Chat</a></li>
+            <li><a href="receivedfiles.php"><i class="fas fa-address-card"></i>Files Received</a></li>
+ 
+            <li><a href="logout.php"><i class="fas fa-map-pin"></i>Logout</a></li>
+        </ul> 
 
-		<a> hello 
-			<?php echo $_SESSION['username'] ?>
-		</a>
+       </div>
+        
+    <div class="main_content">
 
-		<form action = "homepage.php" method = "POST" enctype="multipart/form-data">
-			<input type="file" name="file">
-			<button type ="submit" name="submit">UPLOAD</button>
-			<input type="submit" name="logout" id="logout_btn" value="Log out"/><br>
 
+		<form id="upform" action = "homepage.php" method = "POST" enctype="multipart/form-data">
+			<input type="file" name="file" required>
+			<button id="usubmit" type ="submit" name="submit">UPLOAD</button>
 		</form>
-		<form action = "search.php" method = "POST" enctype="multipart/form-data">
-			<label><b>Search:</b></label><br>
-			<input name="searchdata" type="text" class="inputvalues" placeholder="search files" required />
-			<input type="submit" name="search" id="submit_btn" value="search" /><br>
+        
+		<form id= "sform" action = "search.php" method = "POST" enctype="multipart/form-data">
+			<input name="searchdata" type="text" class="inputvalues" placeholder="Search files" required />
+			<input id="sbutn" type="submit" name="search"  value="search" /><br>
 		</form>	
-
-		<form action = "homepage.php" method = "POST" enctype="multipart/form-data">
-			<input type="submit" name="friendspage" id="submit_btn" value="Friends & Chat" /><br>
-		</form>	
-
-		<form action = "homepage.php" method = "POST" enctype="multipart/form-data">
-			<input type="submit" name="files_received" id="submit_btn" value="Files shared with me" /><br>
-		</form>	
-
 
 
 
@@ -99,20 +101,30 @@ function my_decrypt($data, $key) {
 				$filetype = end($ext);
 
 
-				$query= "insert into userdata(filetag,username,filesize,filetype,filename,filedest) values('$filetag','$username','$filesize','$filetype','$filename','$filedest') ";
+				$query= "insert into userdata(filetag,username,filesize,filetype,filename,filedest) values(?,?,?,?,?,?) ";
+
+                $stmt = mysqli_prepare($con,$query);
+                mysqli_stmt_bind_param($stmt,'ssssss',$filetag,$username,$filesize,$filetype,$filename,$filedest);
+                mysqli_stmt_execute($stmt);
+                $run = mysqli_stmt_get_result($stmt);
             	
-            	$query_run = mysqli_query($con,$query);
+            	//$query_run = mysqli_query($con,$query);
 
 				//echo "<img src=$filedest>";
 				//echo "<embed src=$filedest type= application/pdf width= 100% height= 600px /> ";
 
 
-
 			}
 
 			//echo "<a>this is !!!!</a>";
-			$stmt = "SELECT filename,filedest,filetype from userdata WHERE username='$username'";
-			$query_run = mysqli_query($con,$stmt);
+			$query = "SELECT filename,filedest,filetype from userdata WHERE username=?";
+
+            $stmt = mysqli_prepare($con,$query);
+            mysqli_stmt_bind_param($stmt,'s',$username);
+            mysqli_stmt_execute($stmt);
+            $query_run = mysqli_stmt_get_result($stmt);
+
+			//$query_run = mysqli_query($con,$stmt);
 			$i = 0;
 			//$tt[0] = 'pp';
 			
@@ -163,7 +175,7 @@ function my_decrypt($data, $key) {
 			    	<input type= \"hidden\" name = \"sendfile\" value = \"$name\" >
 				   <button type =\"submit\" name=\"share\">SHARE</button>
 				</form>
-				</figure>";
+				</figure><br>";
 				//$preview = $pre.'jpg';
 
 				
@@ -193,7 +205,7 @@ function my_decrypt($data, $key) {
 			    	<input type= \"hidden\" name = \"sendfile\" value = \"$name\" >
 				   <button type =\"submit\" name=\"share\">SHARE</button>
 				</form>
-				</figure> ";
+				</figure><br> ";
 			}
 			else if ((strcasecmp($type,"doc") == 0) || (strcasecmp($type,"docx") == 0)){
 
@@ -208,7 +220,7 @@ function my_decrypt($data, $key) {
 			    	<input type= \"hidden\" name = \"sendfile\" value = \"$name\" >
 				   <button type =\"submit\" name=\"share\">SHARE</button>
 				</form>
-				 </figure> ";
+				 </figure><br>";
 				
 			}
 
@@ -222,7 +234,7 @@ function my_decrypt($data, $key) {
 				   <input type= \"hidden\" name = \"sendfile\" value = \"$name\" >
 				   <button type =\"submit\" name=\"share\">SHARE</button>
 				</form>
-				</figure> ";			
+				</figure><br>";			
 
 			}
 					
@@ -301,7 +313,7 @@ function my_decrypt($data, $key) {
 
 
 
-			//if ()
+			//if () <script src="https://kit.fontawesome.com/b99e675b6e.js"></script>
 			if(isset($_POST['logout']))
 			{
 				session_destroy();
@@ -309,6 +321,7 @@ function my_decrypt($data, $key) {
 			}
 
 		?>
+        </div>
 	</div>
 
 </body>

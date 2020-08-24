@@ -2,25 +2,45 @@
 <?php
 	require 'dbconfig/config.php';
 	session_start();
+
+	if(!isset($_SESSION['username']))
+		{	
+			header('location:login.php');
+		}
 ?>
 
 <!DOCTYPE html>
 <html>
 <head>
-	<title>HomePage</title>
+	<title>Share</title>
 	<meta charset="UTF-8">
+    <link rel="stylesheet" href="mainstyles.css">
 
 </head>
 
 <body>
-	<div>
+   
+    
+	<div class="wrapper">
+        
+                 <div class="sidebar">
+        <h2>PROJECT-X</h2>
+          <h3 id="uname">hello <?php echo $_SESSION['username'] ?></h3>
+        <ul>
+            <li><a href="homepage.php"><i class="fas fa-home"></i>Home</a></li>
+            <li><a href="friends.php"><i class="fas fa-user"></i>Friends & Chat</a></li>
+            <li><a href="receivedfiles.php"><i class="fas fa-address-card"></i>Files Received</a></li>
+ 
+            <li><a href="logout.php"><i class="fas fa-map-pin"></i>Logout</a></li>
+        </ul> 
 
+       </div>
+        
+       <div class="main_content">
 
 		<form action = "share.php" method = "POST" enctype="multipart/form-data">
-			<label><b>Type username:</b></label><br>
 			<input name="searchuser" type="text" class="inputvalues" placeholder="Type username to send file" required />
 			<input type="submit" name="send" id="submit_btn" value="Send to user" />
-			<a href ="homepage.php"><input type="button" name="returnhome" id="home" value="Return to homepage"/></a>
 			<br>
 		</form>	
 
@@ -37,7 +57,6 @@
 				//$_SESSION["sendf$_POST["sendfile"];
 
 				$_SESSION['sendfilename'] = $_POST["sendfile"];
-
 
 
 			}
@@ -63,8 +82,14 @@
 
 
 
-   			 $query = "SELECT sslkey from userinfo WHERE username = '$username' ";
-   			 $run = mysqli_query($con,$query);
+   			 $query = "SELECT sslkey from userinfo WHERE username = ? ";
+
+             $stmt = mysqli_prepare($con,$query);
+             mysqli_stmt_bind_param($stmt,'s',$username);
+             mysqli_stmt_execute($stmt);
+             $run = mysqli_stmt_get_result($stmt);
+
+   			 //$run = mysqli_query($con,$query);
 
    			 while ($row = mysqli_fetch_assoc($run)) {
 
@@ -79,8 +104,14 @@
    			 { 	
    			 	$receiver = $_POST["searchuser"];
 
-   			    $query = "SELECT rstatus from friends WHERE (user1 = '$username' AND user2 = '$receiver') OR (user2 = '$username' AND user1 = '$receiver') ";
-   			    $run = mysqli_query($con,$query);
+   			    $query = "SELECT rstatus from friends WHERE (user1 = ? AND user2 = ?) OR (user2 = ? AND user1 = ?) ";
+
+                $stmt = mysqli_prepare($con,$query);
+                mysqli_stmt_bind_param($stmt,'ssss',$username,$receiver,$username,$receiver);
+                mysqli_stmt_execute($stmt);
+                $run = mysqli_stmt_get_result($stmt);
+
+   			    //$run = mysqli_query($con,$query);
 
    		    	while ($row = mysqli_fetch_assoc($run)) {
 
@@ -105,8 +136,14 @@
 				//rename($senddest,$filename);
 				unlink($tempfile);
 
-   			    $query = "SELECT sslkey from userinfo WHERE username = '$receiver' ";
-   			    $run = mysqli_query($con,$query);
+   			    $query = "SELECT sslkey from userinfo WHERE username = ? ";
+
+                $stmt = mysqli_prepare($con,$query);
+                mysqli_stmt_bind_param($stmt,'s',$receiver);
+                mysqli_stmt_execute($stmt);
+                $run = mysqli_stmt_get_result($stmt);
+
+   			    //$run = mysqli_query($con,$query);
 
    			   while ($row = mysqli_fetch_assoc($run)) {
 
@@ -125,8 +162,14 @@
 
 
 				if($result){
-					$query = "INSERT into sharedfiles(sender,receiver,filename) values('$username','$receiver','$filename') ";
-					 $run = mysqli_query($con,$query);
+					$query = "INSERT into sharedfiles(sender,receiver,filename) values(?,?,?) ";
+
+              		$stmt = mysqli_prepare($con,$query);
+                	mysqli_stmt_bind_param($stmt,'sss',$username,$receiver,$filename);
+                	mysqli_stmt_execute($stmt);
+                	$run = mysqli_stmt_get_result($stmt);
+
+					//$run = mysqli_query($con,$query);
 					 
 					echo '<script type="text/javascript">alert("file sent successfully !")</script>';
 
@@ -150,3 +193,9 @@
 
 
 		?>
+           
+        </div>
+    </div>
+    </body>
+</html>
+

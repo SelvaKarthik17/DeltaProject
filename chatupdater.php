@@ -6,8 +6,14 @@
     $sender = $_POST['sender'];
     $receiver = $_POST['receiver'];
 
-    $query = "SELECT message,sender,msgtime from chat WHERE (sender = '$sender' AND receiver = '$receiver') OR (sender = '$receiver' AND receiver = '$sender')";
-    $result = mysqli_query($con,$query);
+    $query = "SELECT message,sender,msgtime from chat WHERE (sender = ? AND receiver = ?) OR (sender = ? AND receiver = ?)";
+
+     $stmt = mysqli_prepare($con,$query);
+     mysqli_stmt_bind_param($stmt,'ssss',$sender,$receiver,$receiver,$sender);
+     mysqli_stmt_execute($stmt);
+     $result = mysqli_stmt_get_result($stmt);
+
+   // $result = mysqli_query($con,$query);
 
     $data = "";
 
@@ -19,7 +25,7 @@
             $data = $data . $row['sender'];
             $data = $data . " =>  ".$row['message'];
             $data = $data . "  @ " . $row['msgtime'];
-            $data = $data . '</a><br>';
+            $data = $data . '</a><br><br>';
 
 
 

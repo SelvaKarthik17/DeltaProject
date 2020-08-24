@@ -1,6 +1,11 @@
 <?php
 	require 'dbconfig/config.php';
 	session_start();
+
+	if(!isset($_SESSION['username']))
+		{	
+			header('location:login.php');
+		}
 ?>
 
 <!DOCTYPE html>
@@ -8,16 +13,34 @@
 <head>
 	<title>Received Files</title>
 	<meta charset="UTF-8">
+    <link rel="stylesheet" href="mainstyles.css">
 
 </head>
 
 <body>
-	<div>
+    
+	<div class="wrapper">
 
-		<form action = "receivedfiles.php" method = "POST" >
-			<a href ="homepage.php"><input type="button" name="returnhome" id="home" value="Return to homepage"/></a>
-			<br>
-		</form>	
+        
+       <div class="sidebar">
+        <h2>PROJECT-X</h2>
+          <h3 id="uname">hello <?php echo $_SESSION['username'] ?></h3>
+        <ul>
+            <li><a href="homepage.php"><i class="fas fa-home"></i>Home</a></li>
+            <li><a href="friends.php"><i class="fas fa-user"></i>Friends & Chat</a></li>
+            <li><a href="receivedfiles.php"><i class="fas fa-address-card"></i>Files Received</a></li>
+ 
+            <li><a href="logout.php"><i class="fas fa-map-pin"></i>Logout</a></li>
+        </ul> 
+
+       </div>
+        
+        
+        
+        <div class="main_content">
+        
+        
+    
 
 		<?php
 
@@ -40,8 +63,14 @@
    			 $username =  $_SESSION['username'];
 
 
-            $stmt = "SELECT filename from sharedfiles WHERE receiver='$username'";
-			$query_run = mysqli_query($con,$stmt);
+            $query = "SELECT filename,sender from sharedfiles WHERE receiver=?";
+
+            $stmt = mysqli_prepare($con,$query);
+            mysqli_stmt_bind_param($stmt,'s',$username);
+            mysqli_stmt_execute($stmt);
+            $query_run = mysqli_stmt_get_result($stmt);
+
+			//$query_run = mysqli_query($con,$stmt);
 
 			$i = 0;
 			
@@ -59,6 +88,8 @@
 			//$addr = $row["filedest"] ;
 			//$type = $row["filetype"];
 			$name = $row["filename"];
+            $sender = $row["sender"];
+                
 			$addr = "received/$username/$name";
 			$ext = explode('.', $name);
 			$type = end($ext);
@@ -77,12 +108,13 @@
 
 				
 				echo "<figure>
+                <p>From: $sender</p>
 				<img src=$addr width = 100px height= 100px>
 			 	<figcaption>$name</figcaption>
 			    <form action = \"receivedfiles.php\" method = \"POST\" enctype=\"multipart/form-data\">
 				<button type =\"submit\" name=\"$i\">DOWNLOAD</button>
 				</form>
-				</figure>";
+				</figure><br>";
 
 			}
 
@@ -91,39 +123,42 @@
 			 //echo '<script type="text/javascript">alert("run")</script>';
 				
 			 echo "<figure>
+                <p>From: $sender</p>
 			 	<img src = 'pdflogo.png' width = 100px height= 100px> 
 			 	<figcaption>$name</figcaption>
 			  <form action = \"receivedfiles.php\" method = \"POST\" enctype=\"multipart/form-data\">
 				<button type =\"submit\" name=\"$i\">DOWNLOAD</button>
 				</form>
-				</figure> ";
+				</figure><br> ";
 			}
 			else if ((strcasecmp($type,"doc") == 0) || (strcasecmp($type,"docx") == 0)){
 
 			
 			 echo "<figure>
+                 <p>From: $sender</p>
 				  <img src = 'doclogo.jpg' width = 100px height= 100px>
 				  <figcaption>$name </figcaption>
 			 	  <form action = \"receivedfiles.php\" method = \"POST\" enctype=\"multipart/form-data\">
 				 	<button type =\"submit\" name=\"$i\">DOWNLOAD</button>
 				  </form>
-				 </figure> ";
+				 </figure><br> ";
 				
 			}
 
 			else {
 				echo "<figure>
+                <p>From: $sender</p>
 				<img src = 'filelogo.png' width = 100px height= 100px>
 				<figcaption>$name </figcaption>
 			 	<form action = \"receivedfiles.php\" method = \"POST\" enctype=\"multipart/form-data\">
 					<button type =\"submit\" name=\"$i\">DOWNLOAD</button>
 
-				</figure> ";			
+				</figure><br> ";			
 
 			}
 					
 						if(isset($_POST["$i"]))
-			{   // echo '<script type="text/javascript">alert("rundd")</script>';
+			{    echo '<script type="text/javascript">alert("rundd")</script>';
 				
 
 				$mm = file_get_contents("$add[$i]");
@@ -154,7 +189,7 @@
     				ob_clean();
     				flush();
     				readfile($downfile);
-    				//unlink($downfile);
+    				unlink($downfile);
     				exit;
 				}
 		
@@ -168,7 +203,7 @@
 			}
 
 			?>
-
+        </div>
 		</div>
 	</body>
 	</html>

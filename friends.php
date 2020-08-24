@@ -2,6 +2,11 @@
 <?php
 	require 'dbconfig/config.php';
 	session_start();
+
+	if(!isset($_SESSION['username']))
+		{	
+			header('location:login.php');
+		}
 ?>
 
 <!DOCTYPE html>
@@ -9,21 +14,33 @@
 <head>
 	<title>Friends</title>
 	<meta charset="UTF-8">
+    <link rel="stylesheet" href="mainstyles.css">
 
 </head>
 
 <body>
-	<div>
+    
+	<div class="wrapper">
+        
+        <div class="sidebar">
+        <h2>PROJECT-X</h2>
+          <h3 id="uname">hello <?php echo $_SESSION['username'] ?></h3>
+        <ul>
+            <li><a href="homepage.php"><i class="fas fa-home"></i>Home</a></li>
+            <li><a href="friends.php"><i class="fas fa-user"></i>Friends & Chat</a></li>
+            <li><a href="receivedfiles.php"><i class="fas fa-address-card"></i>Files Received</a></li>
+ 
+            <li><a href="logout.php"><i class="fas fa-map-pin"></i>Logout</a></li>
+        </ul> 
 
-		<a> hello 
-			<?php echo $_SESSION['username'] ?>
-		</a>
+       </div>
+        
+        <div class="main_content">
 
-		<form action = "friends.php" method = "POST" enctype="multipart/form-data">
-			<label><b>Search:</b></label><br>
-			<input name="searchfriends" type="text" class="inputvalues" placeholder="type username to send request" required />
-			<input type="submit" name="fsearch" id="submit_btn" value="send request" />
-			<a href ="homepage.php"><input type="button" name="returnhome" id="home" value="Return to homepage"/></a>
+		<form id= "sform" action = "friends.php" method = "POST" enctype="multipart/form-data">
+			<input name="searchfriends" type="text" class="inputvalues" placeholder="Find friends" required />
+			<input id="sbutn" type="submit" name="fsearch" id="submit_btn" value="send request" />
+
 			<br>
 		</form>	
 
@@ -37,10 +54,15 @@
 			{	
 				global $input;
 
-				$input = $_POST['searchfriends'];
+				$input = trim(htmlspecialchars($_POST['searchfriends']));
 
-				$stmt = "SELECT username from userinfo WHERE username=\"$input\"";
-				$query_run = mysqli_query($con,$stmt);
+				$sql = "SELECT username from userinfo WHERE username=?";
+				$stmt = mysqli_prepare($con,$sql);
+				mysqli_stmt_bind_param($stmt,'s',$input);
+				mysqli_stmt_execute($stmt);
+
+				$query_run = mysqli_stmt_get_result($stmt);
+
 
 				if($input == $username){
 					echo '<script type="text/javascript">alert("invalid")</script>';
@@ -49,8 +71,14 @@
 
 				else if(mysqli_fetch_assoc($query_run))
 				{		
-					$chk = "SELECT rstatus from friends WHERE (user1='$username' AND user2='$input') OR (user2='$username' AND user1='$input')"	;
-					$run = mysqli_query($con,$chk);
+					$chk = "SELECT rstatus from friends WHERE (user1=? AND user2=?) OR (user2=? AND user1=?)"	;
+
+					$stmt = mysqli_prepare($con,$chk);
+					mysqli_stmt_bind_param($stmt,'ssss',$username,$input,$username,$input);
+					mysqli_stmt_execute($stmt);
+					$run = mysqli_stmt_get_result($stmt);
+
+					//$run = mysqli_query($con,$chk);
 					$status = null;
 
 					  while ($row = $run->fetch_assoc())
@@ -67,9 +95,15 @@
 
 					 else {
 							echo "<script type=\"text/javascript\">alert(\"$input\")</script>";
-							$query = "INSERT into friends(user1,user2,rstatus) values('$username','$input','1')";
-							$qrun = mysqli_query($con,$query);
+							$query = "INSERT into friends(user1,user2,rstatus) values(?,?,'1')";
 
+							$stmt = mysqli_prepare($con,$query);
+							mysqli_stmt_bind_param($stmt,'ss',$username,$input);
+							mysqli_stmt_execute($stmt);
+							$qrun = mysqli_stmt_get_result($stmt);
+
+
+							//$qrun = mysqli_query($con,$query);
 							
 							echo '<script type="text/javascript">alert("Request Sent to \"$input\"")</script>';
  							}
@@ -85,15 +119,22 @@
 			}
 
 
-			$query = "SELECT * from friends WHERE (user1='$username'OR user2='$username' )";
-			$qr = mysqli_query($con,$query);
+			$query = "SELECT * from friends WHERE (user1= ? OR user2= ?)";
+			//$qr = mysqli_query($con,$query);
+
+			$stmt = mysqli_prepare($con,$query);
+			mysqli_stmt_bind_param($stmt,'ss',$username,$username);
+			mysqli_stmt_execute($stmt);
+			$qr = mysqli_stmt_get_result($stmt);
+
 			$friend[0] = "";
 			$k = 0;
-
+              echo "<br><p id=\"urfnds\">Your Friends : </p><br>";
+              
 			while ($row = $qr->fetch_assoc())
 					 {		//echo "<script type=\"text/javascript\">alert(\"running\")</script>";
 
-
+                            
 					      if($username == $row["user1"]){
 
 					      	$friend[$k] = $row["user2"];
@@ -101,7 +142,7 @@
 
 					      		if($rs == 1){
 					      				echo "<a>$friend[$k]</a><br>
-					      				      <a>Friend request sent</a> ";
+					      				      <a>Friend request sent</a> <br>";
 					      		} 
 					      	/*	else if ($rs == 0){
 					      			echo "<a>$friend</a><br>
@@ -114,8 +155,8 @@
 					      		    echo "<a>$friend[$k]</a><br>
 					      				<form method=\"post\" action=\"\">     									
         									<input type=\"hidden\" name=\"frd\" value=\"$friend[$k]\"/>
-        									<input type=\"submit\" name=\"chat\" value=\"chat\"/>
-      								    </form>";				      		
+        									<input type=\"submit\" name=\"chat\" value=\"Click to chat\"/>
+      								    </form><br>";				      		
 
 
 					      			//$_SESSION['chatfriend'] = $friend[$k];
@@ -137,7 +178,7 @@
         									<input type=\"submit\" name=\"accept\" value=\"Accept\"/>
         									<input type=\"submit\" name=\"discard\" value=\"Discard\"/>
         									<input type=\"hidden\" name=\"frnd\" value=\"$friend[$k]\"/>
-      								    </form>";				      		
+      								    </form><br>";				      		
 
 					      	}
 
@@ -151,8 +192,8 @@
 					      		    echo "<a>$friend[$k]</a><br>
 					      				<form method=\"post\" action=\"\">     									
         									<input type=\"hidden\" name=\"frd\" value=\"$friend[$k]\"/>
-        									<input type=\"submit\" name=\"chat\" value=\"chat\"/>
-      								    </form>";				      		
+        									<input type=\"submit\" name=\"chat\" value=\"Click to chat\"/>
+      								    </form><br>";				      		
 
 					      			//$_SESSION['chatfriend'] = $friend[$k];
 					      			//unset($friend);
@@ -172,16 +213,28 @@
 				     {
 				     		$friend = $_POST['frnd'];
 				     		//echo "<script type=\"text/javascript\">alert(\"$friend\")</script>";
-				     		$query = "UPDATE friends SET rstatus = '2' WHERE (user1 = '$friend' AND user2 = '$username')";
-				     		$qr = mysqli_query($con,$query);
+				     		$query = "UPDATE friends SET rstatus = '2' WHERE (user1 = ? AND user2 = ?)";
+
+							$stmt = mysqli_prepare($con,$query);
+							mysqli_stmt_bind_param($stmt,'ss',$friend,$username);
+							mysqli_stmt_execute($stmt);
+							$qr = mysqli_stmt_get_result($stmt);
+
+				     		//$qr = mysqli_query($con,$query);
 				     }
 
 
 				     if(isset($_POST['discard']))
 				     {
 				     		$friend = $_POST['frnd'];
-				     		$query = "UPDATE friends SET rstatus = '0' WHERE (user1 = '$friend' AND user2 = '$username')";
-				     		$qr = mysqli_query($con,$query);
+				     		$query = "UPDATE friends SET rstatus = '0' WHERE (user1 = ? AND user2 = ?)";
+
+							$stmt = mysqli_prepare($con,$query);
+							mysqli_stmt_bind_param($stmt,'ss',$friend,$username);
+							mysqli_stmt_execute($stmt);
+							$qr = mysqli_stmt_get_result($stmt);
+
+				     		//$qr = mysqli_query($con,$query);
 				     }
 
 
@@ -199,8 +252,14 @@
 						{	
 							
 							echo "<script type=\"text/javascript\">alert(\"$input\")</script>";
-							$query = "INSERT into friends(user1,user2,rstatus) values('$username','$input','1')";
-							$qrun = mysqli_query($con,$query);
+							$query = "INSERT into friends(user1,user2,rstatus) values(?,?,'1')";
+
+							$stmt = mysqli_prepare($con,$query);
+							mysqli_stmt_bind_param($stmt,'ss',$username,$input);
+							mysqli_stmt_execute($stmt);
+							$qrun = mysqli_stmt_get_result($stmt);
+
+							//$qrun = mysqli_query($con,$query);
 
 							
 								//echo "<a>$input</a><br>
@@ -215,7 +274,7 @@
 
 
 		?>
-
+        </div>
 	</div>
 </body>
 </html>

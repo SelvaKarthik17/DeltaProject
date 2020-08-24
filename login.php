@@ -8,35 +8,47 @@
 <html>
 <head>
 	<title>Login Page</title>
+    <link rel="stylesheet" href="styles.css">
 
 </head>
 <body>
 	<div>
-
-		<form action = "login.php" method = "post">
-			<label><b>Username:</b></label><br>
-			<input name="username" type="text" class="inputvalues" placeholder="Type Username Here"/> <br>
-			<label><b>Password:</b></label><br>
-			<input name="password" type="Password" class="inputvalues" placeholder="Type Password Here"/> <br>
+       <div class="registerform">
+		<form class="rform" action = "login.php" method = "post">
+			<input name="username" type="text" class="inputvalues" placeholder="Username:"/> <br>
+			<input name="password" type="Password" class="inputvalues" placeholder="Password:"/> <br>
 			<input name="login" type="submit" id="login_btn" value="login"/><br>
-			<a href="registration.php"><input type="button" id="register_btn" value="Register"/></a>
+			<a href="registration.php"><input type="button" id="back_btn" value="Go to registration page"/></a>
 		</form>	
+       </div>
+            
 
 		<?php
 		 if(isset($_POST['login']))
 		 {
-		 	$username=$_POST['username'];
-		 	$password=$_POST['password'];
+		 	$username=trim(htmlspecialchars($_POST['username']));		 	
+		 	$password=trim(htmlspecialchars($_POST['password']));
 		 	$key = null;
 
-		 	$query="select * from userinfo WHERE username='$username' AND password='$password'";
+		 	$query="select * from userinfo WHERE username= ? AND password= ?";
 
-		 	$query_run = mysqli_query($con,$query);
+            $stmt = mysqli_prepare($con,$query);
+            mysqli_stmt_bind_param($stmt,'ss',$username,$password);
+            mysqli_stmt_execute($stmt);
+            $query_run = mysqli_stmt_get_result($stmt);
+
+		 	//$query_run = mysqli_query($con,$query);
 
 		 	if(mysqli_num_rows($query_run)>0)
 		 	{	 
-		 	  $query="select sslkey from userinfo WHERE username='$username' ";
-		 	  $query_run = mysqli_query($con,$query);
+		 	  $query="select sslkey from userinfo WHERE username=?";
+
+              $stmt = mysqli_prepare($con,$query);
+              mysqli_stmt_bind_param($stmt,'s',$username);
+              mysqli_stmt_execute($stmt);
+              $query_run = mysqli_stmt_get_result($stmt);
+
+		 	 // $query_run = mysqli_query($con,$query);
 
 		 	  while ($row = $query_run->fetch_assoc())
 				{
