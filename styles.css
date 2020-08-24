@@ -81,8 +81,7 @@
 }
 
 body {
-  background: #FFE4B5; /* fallback for old browsers */
-
+  background: #FFE4B5;
   font-family: "Roboto", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;      
